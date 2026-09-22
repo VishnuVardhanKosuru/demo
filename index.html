@@ -483,8 +483,76 @@ html, body {
   font-size: 14px;
   font-weight: 300;
   color: var(--text-dim);
-  margin-top: 28px;
+  margin-top: 24px;
   letter-spacing: 1px;
+}
+
+#final-logo .team-credits {
+  margin-top: 32px;
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 16px 36px;
+  border-radius: 999px;
+  background: rgba(15, 23, 42, 0.65);
+  border: 1px solid rgba(139, 92, 246, 0.35);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4), 0 0 24px rgba(139, 92, 246, 0.2);
+  opacity: 0;
+  transform: translateY(16px);
+  transition: opacity 1s cubic-bezier(0.16, 1, 0.3, 1), transform 1s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+#final-logo .team-credits.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+#final-logo .team-header {
+  font-family: var(--font-display);
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 3px;
+  color: var(--accent-teal);
+}
+
+#final-logo .team-brand {
+  font-family: var(--font-display);
+  font-size: 22px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  background: linear-gradient(135deg, #ffffff 0%, #c4b5fd 50%, #93c5fd 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+#final-logo .team-members {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  font-family: var(--font-body);
+  font-size: 15px;
+  font-weight: 400;
+  color: #e2e8f0;
+  letter-spacing: 0.5px;
+}
+
+#final-logo .member-name {
+  color: #f1f5f9;
+  font-weight: 500;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+}
+
+#final-logo .member-divider {
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: var(--accent-violet);
+  box-shadow: 0 0 8px var(--accent-violet);
 }
 
 /* ============================================================
@@ -826,6 +894,9 @@ html, body {
   #phone { width: 220px; height: 460px; }
   .scene-text { font-size: 20px; }
   #final-logo .logo-text { font-size: 48px; letter-spacing: 6px; }
+  #final-logo .team-credits { padding: 12px 24px; margin-top: 22px; }
+  #final-logo .team-brand { font-size: 18px; }
+  #final-logo .team-members { font-size: 13px; gap: 10px; }
   .notif-card { font-size: 11px; padding: 8px 12px; }
 }
 </style>
@@ -882,6 +953,17 @@ html, body {
     <div class="logo-text">YAAD</div>
     <div class="tagline">Say It Once. It Remembers.</div>
     <div class="subtext">Your memories. Your phone. Your control.</div>
+    <div class="team-credits" id="team-credits">
+      <div class="team-header">Presented by</div>
+      <div class="team-brand">Team Boom</div>
+      <div class="team-members">
+        <span class="member-name">Lavanya</span>
+        <span class="member-divider"></span>
+        <span class="member-name">Vishnu</span>
+        <span class="member-divider"></span>
+        <span class="member-name">Geetha</span>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -1448,6 +1530,7 @@ class VoiceoverEngine {
       { time: 71.0, text: "And because the core memory engine, runs on the phone, your personal memories, stay with you." },
       { time: 82.0, text: "Yaad." },
       { time: 84.5, text: "Say it once. It remembers." },
+      { time: 88.0, text: "By Team Boom. Lavanya, Vishnu, and Geetha." },
     ];
   }
 
@@ -1554,7 +1637,7 @@ let startTime = 0;
 let currentTime = 0;
 let isPlaying = false;
 let currentScene = -1;
-const TOTAL_DURATION = 92; // seconds
+const TOTAL_DURATION = 95; // seconds
 
 const scenes = [
   { id: 'overload',   start: 0,  end: 13 },
@@ -1564,7 +1647,7 @@ const scenes = [
   { id: 'camera',     start: 49, end: 60 },
   { id: 'findthing',  start: 60, end: 70 },
   { id: 'techreveal', start: 70, end: 80 },
-  { id: 'brand',      start: 80, end: 92 },
+  { id: 'brand',      start: 80, end: 95 },
 ];
 
 // --- DOM references ---
@@ -2604,11 +2687,20 @@ function updateScene8(t, progress) {
     scene8Phase = 2;
   }
 
+  // Show Team Boom credits at 7.0s
+  if (st >= 7.0 && scene8Phase < 3) {
+    const credits = document.getElementById('team-credits');
+    if (credits) credits.classList.add('visible');
+    scene8Phase = 3;
+  }
+
   // Voiceover
   if (st >= 0 && st < 4) {
     showVoiceover('YAAD.');
-  } else if (st >= 5.5) {
+  } else if (st >= 5.5 && st < 8.0) {
     showVoiceover('Say it once. It remembers.');
+  } else if (st >= 8.0) {
+    showVoiceover('By Team Boom — Lavanya, Vishnu & Geetha');
   } else {
     hideVoiceover();
   }
@@ -2624,6 +2716,8 @@ function updateScene8(t, progress) {
 function exitScene8() {
   floatMemCards.forEach(c => c.el && c.el.remove());
   floatMemCards = [];
+  const credits = document.getElementById('team-credits');
+  if (credits) credits.classList.remove('visible');
   hideVoiceover();
   scene8Phase = 0;
 }
